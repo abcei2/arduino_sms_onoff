@@ -3,16 +3,19 @@
 
 #define SIM800_TX_PIN 3             //SIM800 TX is connected to Arduino D3
 #define SIM800_RX_PIN 2             //SIM800 RX is connected to Arduino D2
+#define RELE_PIN 5             //SIM800 RX is connected to Arduino D2
 
 SoftwareSerial serialSIM800(SIM800_TX_PIN, SIM800_RX_PIN);
 
 boolean command_readed=true;
 void setup(void)
 {
-  pinMode(5, OUTPUT);  //Pin de salida que va al relé y pone el color deseado
+  pinMode(RELE_PIN, OUTPUT);  //Pin de salida que va al relé y pone el color deseado
 
-  Serial.begin(9600);
+  digitalWrite(RELE_PIN, LOW);     
+
   serialSIM800.begin(9600);
+  //Serial.begin(9600);
 
   serialSIM800.println(F("AT+CMGF=1"));            //Configuramos el módulo para trabajar con los SMS en modo texto
   delay(500);                                      //Pausa de medio segundo
@@ -23,9 +26,9 @@ void setup(void)
   while (serialSIM800.available() > 0)
   {
     serialSIM800.read();
-    Serial.println(serialSIM800.read());
+    //Serial.println(serialSIM800.read());
   }
-  Serial.println("DONE SETUP");
+  //Serial.println("DONE SETUP");
 }
 
 void loop(void)
@@ -43,18 +46,20 @@ void serialAvailable()   //Cuando hay algo en el buffer del gsm entra aqui
 {
   String command = serialSIM800.readString();
  
-  Serial.println(command);
+  //Serial.println(command);
   if(command_readed){
     if(command.indexOf("COMANDO:")>0){
       if(command.indexOf("ON")>0){
-        Serial.println("prendasa mierda");
-      }else if (command.indexOf("OFF")>0){      
-        Serial.println("apague sa mierda");
+        //Serial.println("prendasa mierda");
+        digitalWrite(RELE_PIN, HIGH);
+      }else if (command.indexOf("OFF")>0){ 
+        digitalWrite(RELE_PIN, LOW);     
+        //Serial.println("apague sa mierda");
       }else{
-        Serial.println("compa no le entiendo");
+        //Serial.println("compa no le entiendo");
       }
     }else{
-      Serial.println("compa no conoce la seña?");
+      //Serial.println("compa no conoce la seña?");
     }
         
     
@@ -63,7 +68,7 @@ void serialAvailable()   //Cuando hay algo en el buffer del gsm entra aqui
   }else{
     if(command.indexOf("+CMT")>0){
       
-      Serial.println("a la espera de un comando");
+      //Serial.println("a la espera de un comando");
       command_readed=false;    
     }            
   }
